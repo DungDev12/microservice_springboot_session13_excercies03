@@ -1,6 +1,8 @@
 package com.exam.identityservice.controller;
 
+import com.exam.identityservice.dto.request.LoginUserRequest;
 import com.exam.identityservice.dto.request.RegisterUserRequest;
+import com.exam.identityservice.dto.response.AuthLoginResponse;
 import com.exam.identityservice.dto.response.AuthRegisterResponse;
 import com.exam.identityservice.service.AuthService;
 import lombok.RequiredArgsConstructor;
@@ -23,11 +25,11 @@ public class AuthController {
                .body(authService.register(request));
    }
 
-   @GetMapping("test-token")
-    public ResponseEntity<String> testToken(
-            @RequestParam String username
-   ){
+  @PostMapping("login")
+    public ResponseEntity<AuthLoginResponse> login(
+            @RequestBody LoginUserRequest request
+  ){
        return  ResponseEntity.status(HttpStatus.OK)
-               .body(authService.testToken(username));
-   }
+               .body(authService.login(request));
+  }
 }

@@ -1,8 +1,12 @@
 package com.exam.identityservice.service;
 
+import com.exam.identityservice.dto.request.LoginUserRequest;
 import com.exam.identityservice.dto.request.RegisterUserRequest;
+import com.exam.identityservice.dto.response.AuthLoginResponse;
 import com.exam.identityservice.dto.response.AuthRegisterResponse;
 import com.exam.identityservice.entity.User;
+import com.exam.identityservice.exception.AccessDeniedException;
+import com.exam.identityservice.exception.ResourceNotFoundException;
 import com.exam.identityservice.repository.UserRepository;
 import com.exam.identityservice.security.jwt.JwtProvider;
 import com.exam.identityservice.service.interfaces.IAuthService;
@@ -30,11 +34,17 @@ public class AuthService implements IAuthService {
         return new AuthRegisterResponse(user.getUsername(), user.getRole());
     }
 
-    public String testToken(String username){
-        User user = userRepository.findByUsername((username)).orElseThrow(
-                () -> new RuntimeException("Username not found!")
+    @Override
+    public AuthLoginResponse login(LoginUserRequest request) {
+        User user = userRepository.findByUsername(request.username()).orElseThrow(
+                () -> new ResourceNotFoundException("Username not found!")
         );
 
-        return jwtProvider.generateToken(user);
+        if(!passwordEncoder.matches(request.password(), user.getPasswordHash())) {
+            throw new AccessDeniedException("Password not match!");
+        }
+        return new AuthLoginResponse(jwtProvider.generateToken(user));
     }
+
+
 }
